@@ -1,0 +1,75 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: idc-app
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8095:8000"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: idc
+      DB_USERNAME: idc
+      DB_PASSWORD: secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - idc
+
+  mysql:
+    image: mysql:8.0
+    container_name: idc-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: idc
+      MYSQL_USER: idc
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - idc-mysql-data:/var/lib/mysql
+      - ./idc.sql:/docker-entrypoint-initdb.d/1-idc.sql
+    ports:
+      - "3312:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - idc
+
+  vite:
+    image: node:20-alpine
+    container_name: idc-vite
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "5186:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    networks:
+      - idc
+
+  model:
+    build:
+      context: ./IDC
+      dockerfile: Dockerfile
+    container_name: idc-model
+    volumes:
+      - ./IDC:/app
+    ports:
+      - "127.0.0.1:5000:5000"
+    networks:
+      - idc
+
+networks:
+  idc:
+
+volumes:
+  idc-mysql-data:
