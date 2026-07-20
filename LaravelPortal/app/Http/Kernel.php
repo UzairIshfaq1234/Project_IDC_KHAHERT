@@ -55,6 +55,9 @@ class Kernel extends HttpKernel
         ],
         'Path'=>[
             \App\Http\Middleware\Path_auth::class
+        ],
+        'AnyRole'=>[
+            \App\Http\Middleware\Any_auth::class
         ]
     ];
 

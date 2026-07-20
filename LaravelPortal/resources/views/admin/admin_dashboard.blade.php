@@ -1,230 +1,282 @@
 @extends('app')
 
-@section('pagetitle', 'ADMIN DASHBOARD')
+@section('pagetitle', 'Admin Dashboard')
 
-{{-- ###################----SECTION START----######## --}}
 @section('content')
+    <div class="idc-shell">
 
+        @include('admin.admin_layout.admin_navbar')
 
-    <body class="fixed-left">
+        <div class="idc-main">
 
-        <!-- Begin page -->
-        <div id="wrapper">
+            @include('layouts.topbar', [
+                'title' => 'Admin Dashboard',
+                'crumb' => 'Administrator',
+                'userName' => session('Admin_Auth_Session'),
+                'avatarFile' => session('Admin_Role_Image'),
+            ])
 
-            @include('admin.admin_layout.admin_navbar')
+            <div class="idc-content">
 
+                {{-- Hero banner --}}
+                <div class="hero-banner anim-fade-up">
+                    <span class="hero-deco d1"></span>
+                    <span class="hero-deco d2"></span>
+                    <span class="hero-badge mb-3"><i class="bi bi-shield-check"></i> Administrator Console</span>
+                    <h4><span data-greeting>Welcome</span>, {{ session('Admin_Auth_Session') }} 👋</h4>
+                    <p>Here's the live overview of your diagnostic center — team, cases and AI screening results.</p>
+                </div>
 
-
-            <!-- ============================================================== -->
-            <!-- Start right Content here -->
-            <!-- ============================================================== -->
-            <div class="content-page">
-                <!-- Start content -->
-                <div class="content">
-                    <div class="container">
-
-                        <!-- Page-Title -->
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <h4 class="page-title">ADMIN DASHBOARD</h4>
-                                <p class="text-muted page-title-alt">Logined By: {{ session()->get('Admin_Auth_Session') }}
-                                </p>
+                {{-- KPI row: team --}}
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6 col-xl-4">
+                        <div class="idc-card stat-card anim-fade-up anim-d1">
+                            <span class="stat-glow bg-grad-primary"></span>
+                            <div class="stat-icon bg-grad-primary"><i class="bi bi-person-badge"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_admin_count }}</div>
+                                <div class="stat-label">Total Logins</div>
                             </div>
-
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6 col-lg-4">
-                                <div class="widget-bg-color-icon card-box fadeInDown animated">
-                                    <div class="bg-icon bg-icon-danger pull-left">
-                                        <i class="md-account-box text-danger"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <h3 class="text-dark"><b class="counter">{{ $all_admin_count }}</b></h3>
-                                        <p class="text-muted">ADMIN</p>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                </div>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <div class="idc-card stat-card anim-fade-up anim-d2">
+                            <span class="stat-glow bg-grad-emerald"></span>
+                            <div class="stat-icon bg-grad-emerald"><i class="bi bi-eyedropper"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_LT_count }}</div>
+                                <div class="stat-label">Lab Technicians</div>
                             </div>
-
-                            <div class="col-md-6 col-lg-4">
-                                <div class="widget-bg-color-icon card-box">
-                                    <div class="bg-icon bg-icon-success pull-left">
-                                        <i class=" md-group text-success"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <h3 class="text-dark"><b class="counter">{{ $all_LT_count }}</b></h3>
-                                        <p class="text-muted">TECHNICIAN</p>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 col-lg-4">
-                                <div class="widget-bg-color-icon card-box">
-                                    <div class="bg-icon bg-icon-purple pull-left">
-                                        <i class=" md-local-hospital text-purple"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <h3 class="text-dark"><b class="counter">{{ $all_Path_count }}</b></h3>
-                                        <p class="text-muted">PATHOLOGIST</p>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                </div>
-                            </div>
-
-
                         </div>
-                        <div class="row text-center ">
-                            <div class="col-lg-4">
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <div class="idc-card stat-card anim-fade-up anim-d3">
+                            <span class="stat-glow bg-grad-rose"></span>
+                            <div class="stat-icon bg-grad-rose"><i class="bi bi-clipboard2-pulse"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_Path_count }}</div>
+                                <div class="stat-label">Pathologists</div>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="card-box">
-                                    <div>
-                                        <canvas id="myChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                            </div>
-
-                        
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row">
-
-                            <div class="col-lg-12">
-                                <div class="card-box">
-                                    <h4 class="text-dark text-center header-title m-t-0 m-b-30">Total Positive Cases</h4>
-
-                                    <div class="widget-chart text-center">
-                                        <input class="knob" data-width="150" data-height="150" data-linecap=round
-                                            data-fgColor="#fb6d9d" value="{{ $all_Postive_count }}" data-skin="tron"
-                                            data-angleOffset="180" data-readOnly=true data-thickness=".15" />
-
-                                        <ul class="list-inline m-t-15">
-                                            <li>
-                                                <h5 class="text-muted m-t-20">Negative Cases</h5>
-                                                <h4 class="m-b-0">{{ $all_Negative_count }}</h4>
-                                            </li>
-                                            <li>
-                                                <h5 class="text-muted m-t-20">Total Cases</h5>
-                                                <h4 class="m-b-0">{{ $all_Patient_count }}</h4>
-                                            </li>
-
-                                        </ul>
-                                    </div>
+                {{-- Charts row --}}
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-7">
+                        <div class="idc-card h-100 anim-fade-up anim-d2">
+                            <div class="card-head">
+                                <div>
+                                    <h6>Case Intake Trend</h6>
+                                    <div class="sub">Patients registered over the last 6 months</div>
                                 </div>
-
+                                <span class="badge-soft badge-soft-primary"><span class="dot"></span>Live data</span>
                             </div>
-
-
-
-
-                        </div>
-                        <!-- end row -->
-                        <div class="row">
-                            <div class="col-md-6 col-lg-6">
-                                <div class="widget-bg-color-icon card-box fadeInDown animated">
-                                    <div class="bg-icon bg-icon-info pull-left">
-                                        <i class=" md-local-library text-info"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <h3 class="text-dark"><b>{{ $all_Treated_count }}</b></h3>
-                                        <p class="text-muted">Treated Cases</p>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 col-lg-6">
-                                <div class="widget-bg-color-icon card-box">
-                                    <div class="bg-icon bg-icon-pink pull-left">
-                                        <i class=" md-remove-red-eye text-pink"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <h3 class="text-dark"><b>{{ $all_NotTreated_count }}</b></h3>
-                                        <p class="text-muted">Not Treated Cases</p>
-                                    </div>
-                                    <div class="clearfix"></div>
+                            <div class="card-inner">
+                                <div class="chart-box" style="height: 265px;">
+                                    <canvas id="trendChart"></canvas>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="idc-card h-100 anim-fade-up anim-d3">
+                            <div class="card-head">
+                                <div>
+                                    <h6>Diagnosis Outcomes</h6>
+                                    <div class="sub">IDC screening results distribution</div>
+                                </div>
+                            </div>
+                            <div class="card-inner">
+                                <div class="chart-box mx-auto" style="height: 220px; max-width: 260px;">
+                                    <canvas id="resultChart"></canvas>
+                                </div>
+                                <div class="mini-legend">
+                                    <span class="lg"><span class="sw" style="background:#f43f5e;"></span>Positive · {{ $all_Postive_count }}</span>
+                                    <span class="lg"><span class="sw" style="background:#10b981;"></span>Negative · {{ $all_Negative_count }}</span>
+                                    <span class="lg"><span class="sw" style="background:#94a3b8;"></span>Pending · {{ max($all_Patient_count - $all_Postive_count - $all_Negative_count, 0) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                {{-- Cases KPIs + progress --}}
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="idc-card stat-card anim-fade-up anim-d1">
+                            <div class="stat-icon bg-grad-sky"><i class="bi bi-folder2-open"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_Patient_count }}</div>
+                                <div class="stat-label">Total Cases</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="idc-card stat-card anim-fade-up anim-d2">
+                            <div class="stat-icon bg-grad-rose"><i class="bi bi-virus"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_Postive_count }}</div>
+                                <div class="stat-label">Positive Cases</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="idc-card stat-card anim-fade-up anim-d3">
+                            <div class="stat-icon bg-grad-emerald"><i class="bi bi-check2-circle"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_Treated_count }}</div>
+                                <div class="stat-label">Treated Cases</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="idc-card stat-card anim-fade-up anim-d4">
+                            <div class="stat-icon bg-grad-amber"><i class="bi bi-hourglass-split"></i></div>
+                            <div>
+                                <div class="stat-value counter">{{ $all_NotTreated_count }}</div>
+                                <div class="stat-label">Awaiting Review</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-
-
-                    
-
-
-
-                        <!-- end row -->
-
-
-                    </div> <!-- container -->
-
-                </div> <!-- content -->
-                <footer class="footer text-right">
-                    2023 © MUHAMMAD UZAIR ISHFAQ & KHADIJA IBRAHIM.
-                </footer>
+                {{-- Recent patients --}}
+                <div class="idc-card anim-fade-up anim-d4 mb-2">
+                    <div class="table-toolbar">
+                        <div>
+                            <h6 class="mb-0 fw-bolder">Recent Patients</h6>
+                            <div class="sub text-muted small fw-semibold">Latest samples registered in the laboratory</div>
+                        </div>
+                        <a href="{{ route('patient.allpatient') }}" class="btn btn-soft btn-sm ms-auto">
+                            View all <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Sample No</th>
+                                    <th>Added By</th>
+                                    <th>Result</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($recent_patients as $p)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="avatar avatar-sm avatar-grad-{{ ($loop->index % 5) + 1 }}">{{ strtoupper(substr($p->Name, 0, 2)) }}</span>
+                                                <div>
+                                                    <div class="cell-title">{{ $p->Name }}</div>
+                                                    <div class="cell-sub">{{ $p->Email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge-soft badge-soft-violet">#{{ $p->Sampleno }}</span></td>
+                                        <td>{{ $p->Addedby }}</td>
+                                        <td>
+                                            @if ($p->Result === 'Positive')
+                                                <span class="badge-soft badge-soft-danger"><span class="dot"></span>Positive</span>
+                                            @elseif ($p->Result === 'Negative')
+                                                <span class="badge-soft badge-soft-success"><span class="dot"></span>Negative</span>
+                                            @else
+                                                <span class="badge-soft badge-soft-warning"><span class="dot"></span>Pending</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($p->treated == '1')
+                                                <span class="badge-soft badge-soft-info">Treated</span>
+                                            @else
+                                                <span class="badge-soft badge-soft-warning">In queue</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr data-empty-row>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <div class="es-icon"><i class="bi bi-clipboard2-data"></i></div>
+                                                <h6>No patients yet</h6>
+                                                <p>Registered patients will appear here.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             </div>
 
-
-            <!-- ============================================================== -->
-            <!-- End Right content here -->
-            <!-- ============================================================== -->
-
-
-
+            <footer class="idc-footer">
+                <span>© {{ date('Y') }} IDC Portal — Muhammad Uzair Ishfaq &amp; Khadija Ibrahim</span>
+                <span><i class="bi bi-cpu me-1"></i>AI-assisted histopathology</span>
+            </footer>
         </div>
-        <!-- END wrapper -->
+    </div>
+@endsection
 
-    </body>
-
+@push('scripts')
     <script>
-        const ctx = document.getElementById('myChart');
-    
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: [
-                    'IDC Positive Cases',
-                    'IDC Negative Cases',
-                ],
-                datasets: [{
-                    label: 'IDC PIE CHART',
-                    data: [{{ $all_Postive_count }}, {{ $all_Negative_count }}],
-                    backgroundColor: [
-                        'rgb(240, 80, 80)',
-                        'rgb(39, 156, 3)',
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'IDC Pie Chart Analysis',
-                        position: 'top',
-                        font: {
-                            size: 16
-                        }
-                    }
+        (function () {
+            var trendCtx = document.getElementById('trendChart');
+            new Chart(trendCtx, {
+                type: 'bar',
+                data: {
+                    labels: @json($trend_labels),
+                    datasets: [{
+                        label: 'Total intake',
+                        data: @json($trend_total),
+                        backgroundColor: 'rgba(99, 102, 241, .85)',
+                        hoverBackgroundColor: '#4f46e5',
+                        borderRadius: 8,
+                        maxBarThickness: 34
+                    }, {
+                        label: 'Positive',
+                        data: @json($trend_positive),
+                        backgroundColor: 'rgba(244, 63, 94, .8)',
+                        hoverBackgroundColor: '#e11d48',
+                        borderRadius: 8,
+                        maxBarThickness: 34
+                    }]
                 },
-                scales: {
-                    y: {
-                        ticks: {
-                            beginAtZero: true
-                        }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(148, 163, 184, .15)' } }
                     }
                 }
-            }
-        });
+            });
+
+            var resultCtx = document.getElementById('resultChart');
+            new Chart(resultCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Negative', 'Pending'],
+                    datasets: [{
+                        data: [
+                            {{ $all_Postive_count }},
+                            {{ $all_Negative_count }},
+                            {{ max($all_Patient_count - $all_Postive_count - $all_Negative_count, 0) }}
+                        ],
+                        backgroundColor: ['#f43f5e', '#10b981', '#94a3b8'],
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        })();
     </script>
-    
-
-
-    {{-- ###################----SECTION END----######## --}}
-@endsection
+@endpush

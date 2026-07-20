@@ -1,86 +1,55 @@
-            <!-- Top Bar Start -->
-            <div class="topbar">
+{{-- ===== Pathologist sidebar ===== --}}
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-                <!-- LOGO -->
-                <div class="topbar-left">
-                    <div class="text-center">
-                        <a href="#" class="logo"><span style="font-size: 15px;font-weight:bold;">I D
-                            C </span>
-                            <span style="font-size: 12px;font-weight:bold;color:white;">Cancer Detection</span>
-                        </a>
-                    </div>
-                </div>
+<aside class="idc-sidebar" id="idcSidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="bi bi-activity"></i></div>
+        <div class="brand-text">
+            <strong>I D C</strong>
+            <small>Cancer Detection</small>
+        </div>
+    </div>
 
-                <!-- Button mobile view to collapse sidebar menu -->
-                <div class="navbar navbar-default" role="navigation">
-                    <div class="container">
-                        <div class="">
-                            <div class="pull-left">
-                                <button class="button-menu-mobile open-left">
-                                    <i class="ion-navicon"></i>
-                                </button>
-                                <span class="clearfix"></span>
-                            </div>
+    <div class="sidebar-user">
+        @if (session('Path_Role_image'))
+            <img src="{{ asset('Admin_Images/' . session('Path_Role_image')) }}" alt="user" class="avatar">
+        @else
+            <span class="avatar avatar-grad-2">{{ strtoupper(substr(session('Path_Auth_Session', 'P'), 0, 2)) }}</span>
+        @endif
+        <div>
+            <div class="u-name">{{ session('Path_Auth_Session') }}</div>
+            <div class="u-role">Pathologist</div>
+        </div>
+    </div>
 
- 
+    <nav class="sidebar-nav">
+        <div class="nav-section">Pathology</div>
+        <a href="{{ route('Path.dashboard_page') }}"
+            class="idc-nav-item {{ request()->routeIs('Path.dashboard_page') ? 'active' : '' }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
 
-                            <ul class="nav navbar-nav navbar-right pull-right">
-                     
-                                <li class="hidden-xs">
-                                    <a href="#" id="btn-fullscreen" class="waves-effect waves-light"><i
-                                            class="icon-size-fullscreen"></i></a>
-                                </li>
-        
-                                <li class="dropdown">
-                                    <a href="" class="dropdown-toggle profile" data-toggle="dropdown"
-                                    aria-expanded="true"><img
-                                        src="{{ asset('Admin_Images/' . session('Path_Role_image')) }}" alt="user-img"
-                                        class="img-circle"> </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="javascript:void(0)"><i class="ti-user m-r-5"></i> Profile</a></li>
-  
-                                        <li><a href="{{route('Page.logout')}}"><i class="ti-power-off m-r-5"></i> Logout</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                        <!--/.nav-collapse -->
-                    </div>
-                </div>
-            </div>
-            <!-- Top Bar End -->
+        <div class="nav-section">Clinical Work</div>
+        <a href="{{ route('Path.Appointments') }}"
+            class="idc-nav-item {{ request()->routeIs('Path.Appointments') ? 'active' : '' }}">
+            <i class="bi bi-calendar2-check"></i> Appointments
+        </a>
+        <a href="{{ route('patient.calendar') }}"
+            class="idc-nav-item {{ request()->routeIs('patient.calendar') ? 'active' : '' }}">
+            <i class="bi bi-calendar3"></i> Submissions Calendar
+        </a>
+        <a href="http://127.0.0.1:5000/" target="_blank" class="idc-nav-item">
+            <i class="bi bi-cpu"></i> AI Detection Engine
+            <span class="nav-pill">AI</span>
+        </a>
+    </nav>
 
-
-            <!-- ========== Left Sidebar Start ========== -->
-
-            <div class="left side-menu">
-                <div class="sidebar-inner slimscrollleft">
-                    <!--- Divider -->
-                    <div id="sidebar-menu">
-                        <ul>
-
-                            <li class="text-muted menu-title">PATHOLOGIST</li>
-
-                            <li class="">
-                                <a href="{{ route('Path.dashboard_page') }}" class="waves-effect"><i
-                                        class="ti-home"></i> <span> Dashboard
-                                    </span> </a>
-                            </li>
-                            <li class="has_sub">
-                                <a href="#" class="waves-effect"><i class=" md-accessibility"></i>
-                                    <span>Patients Appointment
-                                    </span> </a>
-                                <ul class="list-unstyled">
-                                    <li><a href="{{ route('Path.Appointments') }}">Appointments</a></li>
-                                </ul>
-                            </li>
-
-
-                        </ul>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-            <!-- Left Sidebar End -->
+    <div class="sidebar-footer">
+        <a href="{{ route('profile.my') }}" class="idc-nav-item {{ request()->routeIs('profile.my') ? 'active' : '' }}">
+            <i class="bi bi-person-circle"></i> My Profile
+        </a>
+        <a href="{{ route('Page.logout') }}" class="idc-nav-item">
+            <i class="bi bi-box-arrow-right"></i> Sign Out
+        </a>
+    </div>
+</aside>

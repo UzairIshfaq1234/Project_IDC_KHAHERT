@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class idc_patient extends Model
 {
+    protected $primaryKey = 'Id';
+
     protected $fillable = ['Sampleno','Name','Email','Contactno','Addedby','Doctorby','Result','Image','treated'];
 
     use HasFactory;

@@ -1,35 +1,39 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="A fully featured IDC admin theme which can be used to build CRM, CMS, etc.">
-        <meta name="author" content="Muhammad Uzair Ishfaq">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="IDC — AI-assisted Invasive Ductal Carcinoma detection & patient management portal.">
+    <meta name="author" content="Muhammad Uzair Ishfaq">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <link rel="shortcut icon" href="{{asset('assets/images/favicon_1.ico')}}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon_1.ico') }}">
 
-        <title>IDC-@yield('pagetitle')</title>
-        <link href="{{asset('assets/plugins/datatables/jquery.dataTables.min.css')}}" rel="stylesheet" type="text/css" />
+    <title>IDC · @yield('pagetitle')</title>
 
-        <link href="{{asset('assets/plugins/footable/css/footable.core.css')}}" rel="stylesheet">
-		<link href="{{asset('assets/plugins/bootstrap-select/dist/css/bootstrap-select.min.css')}}" rel="stylesheet" />
+    {{-- Apply saved theme before first paint (prevents flash) --}}
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('idc-theme');
+                if (t) document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        })();
+    </script>
 
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        <link href="{{asset('assets/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
-        <link href="{{asset('assets/css/core.css')}}" rel="stylesheet" type="text/css" />
-        <link href="{{asset('assets/css/components.css')}}" rel="stylesheet" type="text/css" />
-        <link href="{{asset('assets/css/icons.css')}}" rel="stylesheet" type="text/css" />
-        <link href="{{asset('assets/css/pages.css')}}" rel="stylesheet" type="text/css" />
-        <link href="{{asset('assets/css/responsive.css')}}" rel="stylesheet" type="text/css" />
-        <script src="{{asset('assets/js/modernizr.min.js')}}"></script>
-        <link rel="stylesheet" href="{{asset('assets/plugins/morris/morris.css')}}">
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.9.0/dist/sweetalert2.all.min.js"></script>
+    {{-- Bootstrap 5 + Icons --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18"></script>
+    {{-- IDC design system --}}
+    <link href="{{ asset('assets/css/idc-modern.css') }}" rel="stylesheet">
 
-        
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-    </head>
+    {{-- Core libs (loaded in head so page-level inline scripts can use them) --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+</head>

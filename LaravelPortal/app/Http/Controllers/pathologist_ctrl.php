@@ -31,7 +31,9 @@ class pathologist_ctrl extends Controller
     ->count();
 
 
-        return view('Pathologist.pathologist_dashboard',compact('total_patient_added_today_treated','all_Patient_count','last_updated_treated_record','all_NotTreated_count','all_Treated_count','patientsTreatedByDoctorCount'));
+    $pending_queue = idc_patient::where('treated', '0')->latest('created_at')->take(6)->get();
+
+        return view('Pathologist.pathologist_dashboard',compact('total_patient_added_today_treated','all_Patient_count','last_updated_treated_record','all_NotTreated_count','all_Treated_count','patientsTreatedByDoctorCount','pending_queue'));
     }
 
     public function Appointments(){

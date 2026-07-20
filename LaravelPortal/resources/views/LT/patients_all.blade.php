@@ -1,390 +1,245 @@
 @extends('app')
 
-@section('pagetitle', 'ALL PATIENT')
+@section('pagetitle', 'All Patients')
 
-{{-- ###################----SECTION START----######## --}}
 @section('content')
+    <div class="idc-shell">
 
+        @include('LT.LT_layout.LT_navbar')
 
-    <body class="fixed-left">
+        <div class="idc-main">
 
-        <!-- Begin page -->
-        <div id="wrapper">
+            @include('layouts.topbar', [
+                'title' => 'All Patients',
+                'crumb' => 'Lab Technician · Patients',
+                'userName' => session('LT_Auth_Session'),
+                'avatarFile' => session('LT_Role_Image'),
+            ])
 
-            @include('LT.LT_layout.LT_navbar')
+            <div class="idc-content">
 
-
-
-            <!-- ============================================================== -->
-            <!-- Start right Content here -->
-            <!-- ============================================================== -->
-            <div class="content-page">
-                <!-- Start content -->
-                <div class="content">
-                    <div class="container">
-
-
-
-                        <!-- End row -->
-                        <!-- Page-Title -->
-                        <div class="row ">
-                            <div class="col-sm-12">
-                                <h4 class="page-title ">All Patient</h4>
-
-                            </div>
-
-
+                <div class="idc-card anim-fade-up">
+                    <div class="table-toolbar">
+                        <div>
+                            <h6 class="mb-0 fw-bolder"><i class="bi bi-clipboard2-data me-2 text-gradient"></i>Patient Registry</h6>
+                            <div class="text-muted small fw-semibold">{{ count($all_patient_records) }} registered samples</div>
                         </div>
-                        <br>
-
-
-                        <div class="panel">
-
-                            <div class="panel-body">
-
-
-
-
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="card-box">
-
-
-                                            <table id="demo-foo-filtering" class="table table-striped toggle-circle m-b-0"
-                                                data-page-size="7">
-                                                <thead>
-                                                    <tr>
-                                                        <th data-toggle="true">Sample No</th>
-                                                        <th data-hide="phone">Name</th>
-                                                        <th data-hide="phone,tablet">Email</th>
-                                                        <th data-hide="phone,tablet">Contactno</th>
-                                                        <th data-hide="phone,tablet">Added by (LT)</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <div class="form-inline m-b-20">
-                                                    <div class="row">
-                                                        <div class="col-sm-6 text-xs-center">
-                                                            <div class="form-group">
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-sm-6 text-xs-center text-right">
-                                                            <div class="form-group">
-                                                                <input id="demo-foo-search" type="text"
-                                                                    placeholder="Search" class="form-control input-sm"
-                                                                    autocomplete="on">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <tbody>
-                                                    @foreach ($all_patient_records as $record)
-                                                        <tr class="gradeX">
-
-                                                            <td>{{ $record->Sampleno}}</td>
-                                                            <td>{{ $record->Name }}</td>
-                                                            <td>{{ $record->Email }}</td>
-                                                            <td>{{ $record->Contactno }}</td>
-                                                            <td>{{ $record->Addedby }}</td>
-
-                                                            <td class="actions ">
-
-                                                                <!-- Custom Modals -->
-
-                                                                <div id="con-close-modal" class="modal fade" tabindex="-1"
-                                                                    role="dialog" aria-labelledby="myModalLabel"
-                                                                    aria-hidden="true" style="display: none;">
-                                                                    <div class="modal-dialog">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <button type="button" class="close"
-                                                                                    data-dismiss="modal"
-                                                                                    aria-hidden="true">×</button>
-                                                                                <h4 class="modal-title">Update Patient Data
-                                                                                </h4>
-                                                                            </div>
-                                                                            <form action="{{ route('patient.updatepatient') }}"
-                                                                                method="POST" enctype="multipart/form-data"
-                                                                                id="form" data-parsley-validate
-                                                                                novalidate>
-                                                                                {{ csrf_field() }}
-
-                                                                                <div class="modal-body">
-
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label for="Name">Name
-                                                                                                    <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input type="text"
-                                                                                                    name="Name"
-                                                                                                    parsley-trigger="change"
-                                                                                                    required
-                                                                                                    placeholder="Enter Name"
-                                                                                                    class="form-control"
-                                                                                                    id="Name">
-                                                                                                @error('name')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="Email">Email
-                                                                                                    <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input type="text"
-                                                                                                    name="Email"
-                                                                                                    parsley-trigger="change"
-                                                                                                    required
-                                                                                                    placeholder="Enter Email"
-                                                                                                    class="form-control"
-                                                                                                    id="Email">
-                                                                                                @error('Email')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-
-
-
-
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-12">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="pass1">Contact
-                                                                                                    No <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input id="Contactno"
-                                                                                                    type="text"
-                                                                                                    name="Contactno"
-                                                                                                    placeholder="Enter Contact No"
-                                                                                                    required
-                                                                                                    class="form-control">
-
-                                                                                                @error('Contactno')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-
-
-
-
-
-                                                                                    <div class="row">
-
-                                                                                        <div class="form-group col-md-12">
-
-                                                                                            <input type="hidden"
-                                                                                                name="Id"
-                                                                                                class="form-control"
-                                                                                                id="field-4">
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                </div>
-                                                                                <div class="modal-footer">
-                                                                                    <button type="button"
-                                                                                        class="btn btn-default waves-effect"
-                                                                                        data-dismiss="modal">Close</button>
-                                                                                    <button type="submit"
-                                                                                        class="btn btn-info waves-effect waves-light">Save
-                                                                                        changes</button>
-                                                                                </div>
-                                                                            </form>
-
-                                                                        </div>
-                                                                    </div>
-                                                                </div><!-- /.modal -->
-
-                                                                <a href="#"
-                                                                    class="on-default waves-effect waves-light edit-button"
-                                                                    data-record="{{ json_encode($record) }}"
-                                                                    data-toggle="modal" data-target="#con-close-modal">
-                                                                    <i class="fa fa-pencil"></i>
-                                                                </a>
-                                         
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-
-                                                </tbody>
-
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+                            <button class="btn btn-soft btn-sm" data-export-table="#patientTable" data-export-name="idc-patients">
+                                <i class="bi bi-download me-1"></i>CSV
+                            </button>
+                            <button class="btn btn-soft btn-sm" data-print-page>
+                                <i class="bi bi-printer me-1"></i>Print
+                            </button>
+                            <a href="{{ route('patient.add') }}" class="btn btn-gradient btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i>Add Patient
+                            </a>
+                            <div class="search-box">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control form-control-sm" placeholder="Search patients…"
+                                    data-table-search="#patientTable">
                             </div>
-                            <!-- end: page -->
+                        </div>
+                    </div>
 
+                    <div class="table-responsive">
+                        <table class="table table-modern" id="patientTable">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Sample No</th>
+                                    <th>Contact</th>
+                                    <th>Added By</th>
+                                    <th>Result</th>
+                                    <th>Status</th>
+                                    <th data-no-export>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($all_patient_records as $record)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="avatar avatar-grad-{{ ($loop->index % 5) + 1 }}">{{ strtoupper(substr($record->Name ?? 'P', 0, 2)) }}</span>
+                                                <div>
+                                                    <div class="cell-title">{{ $record->Name }}</div>
+                                                    <div class="cell-sub">{{ $record->Email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge-soft badge-soft-violet">#{{ $record->Sampleno }}</span></td>
+                                        <td>{{ $record->Contactno }}</td>
+                                        <td>{{ $record->Addedby }}</td>
+                                        <td>
+                                            @if ($record->Result === 'Positive')
+                                                <span class="badge-soft badge-soft-danger"><span class="dot"></span>Positive</span>
+                                            @elseif ($record->Result === 'Negative')
+                                                <span class="badge-soft badge-soft-success"><span class="dot"></span>Negative</span>
+                                            @else
+                                                <span class="badge-soft badge-soft-warning"><span class="dot"></span>Pending</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($record->treated == '1')
+                                                <span class="badge-soft badge-soft-info">Treated</span>
+                                            @else
+                                                <span class="badge-soft badge-soft-warning">In queue</span>
+                                            @endif
+                                        </td>
+                                        <td data-no-export>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ route('patient.profile', ['id' => $record->Id]) }}"
+                                                    class="btn-icon edit" title="Patient profile & tracking">
+                                                    <i class="bi bi-person-lines-fill"></i>
+                                                </a>
+                                                <a href="{{ route('patient.receipt', ['id' => $record->Id]) }}"
+                                                    class="btn-icon edit" title="Registration receipt">
+                                                    <i class="bi bi-receipt"></i>
+                                                </a>
+                                                <a href="{{ route('patient.label', ['id' => $record->Id]) }}"
+                                                    class="btn-icon edit" title="Print barcode label">
+                                                    <i class="bi bi-upc"></i>
+                                                </a>
+                                                @if ($record->treated == '1')
+                                                    <a href="{{ route('patient.report', ['id' => $record->Id]) }}"
+                                                        class="btn-icon edit" title="Diagnosis report">
+                                                        <i class="bi bi-file-earmark-medical"></i>
+                                                    </a>
+                                                @endif
+                                                <button type="button" class="btn-icon edit edit-button" title="Edit"
+                                                    data-record="{{ json_encode($record) }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editPatientModal">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <div class="empty-state" data-search-empty style="display:none;">
+                            <div class="es-icon"><i class="bi bi-search"></i></div>
+                            <h6>No matches found</h6>
+                            <p>Try a different search term.</p>
                         </div>
                     </div>
                 </div>
 
-                <footer class="footer text-right">
-                    2023 © MUHAMMAD UZAIR ISHFAQ & KHADIJA IBRAHIM.
-                </footer>
-
             </div>
 
-
-            <!-- ============================================================== -->
-            <!-- End Right content here -->
-            <!-- ============================================================== -->
-
-
-
-
+            <footer class="idc-footer">
+                <span>© {{ date('Y') }} IDC Portal — Muhammad Uzair Ishfaq &amp; Khadija Ibrahim</span>
+                <span><i class="bi bi-cpu me-1"></i>AI-assisted histopathology</span>
+            </footer>
         </div>
-        <!-- END wrapper -->
-        <script>
-            $(document).ready(function() {
-                $('.delete-link-admin').click(function(event) {
-                    event.preventDefault(); // Prevent the default link behavior
+    </div>
 
-                    var deleteUrl = $(this).attr('href');
-                    var recordId = $(this).data('id');
+    {{-- ===== Edit Patient modal (single, shared) ===== --}}
+    <div id="editPatientModal" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span class="mi"><i class="bi bi-pencil-square"></i></span>
+                        Update Patient
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-                    // Show confirmation dialog
-                    Swal.fire({
-                        title: 'Delete Confirmation',
-                        text: 'Are you sure you want to delete this record?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#5FBEAA',
-                        confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Proceed with deletion
-                            deleteRecord(deleteUrl, recordId);
-                        }
-                    });
-                });
+                <form action="{{ route('patient.updatepatient') }}" method="POST" enctype="multipart/form-data" id="form" novalidate>
+                    {{ csrf_field() }}
 
-                function deleteRecord(url, id) {
-                    $.ajax({
-                        url: url,
-                        type: "GET", // or "POST" based on your route definition
-                        success: function(response) {
-                            // Handle success response
-                            console.log(response);
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="Name">Name <span class="req">*</span></label>
+                                <input type="text" name="Name" required placeholder="Enter Name" class="form-control" id="Name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Email">Email <span class="req">*</span></label>
+                                <input type="text" name="Email" required placeholder="Enter Email" class="form-control" id="Email">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="Contactno">Contact No <span class="req">*</span></label>
+                                <input id="Contactno" type="text" name="Contactno" maxlength="11"
+                                    placeholder="Enter Contact No" required class="form-control">
+                            </div>
+                        </div>
+                        <input type="hidden" name="Id" id="field-4">
+                        <div class="small text-muted fw-semibold mt-3">
+                            <i class="bi bi-envelope-check me-1"></i>The patient will receive an email about this update.
+                        </div>
+                    </div>
 
-                            // Show success notification to the user
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.toast_message,
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // Redirect back after the success notification
-                                    window.location.reload();
-                                }
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-gradient">
+                            <i class="bi bi-check2-circle me-1"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('.edit-button').click(function() {
+                var recordData = $(this).data('record');
+                $('#Name').val(recordData.Name);
+                $('#Email').val(recordData.Email);
+                $('#Contactno').val(recordData.Contactno);
+
+                $('#field-4').val(recordData.Id);
+            });
+
+            $('#form').submit(function(e) {
+                e.preventDefault();
+                var routter = @json(route('patient.updatepatient'));
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: routter,
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessage = '';
+                            $.each(errors, function(key, value) {
+                                errorMessage += value[0] + '<br>';
                             });
-                        },
-                        error: function(xhr) {
-                            // Handle error cases
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validation Error',
+                                html: errorMessage,
+                            });
+                        } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
                                 text: 'Something went wrong. Please try again.',
                             });
                         }
-                    });
-                }
-            });
-        </script>
-
-
-        <script>
-            $(document).ready(function() {
-                $('.edit-button').click(function() {
-                    var recordData = $(this).data('record');
-                    $('#Name').val(recordData.Name);
-                    $('#Email').val(recordData.Email);
-                    $('#Contactno').val(recordData.Contactno);
-
-                    $('#field-4').val(recordData.Id);
-
-                    // You can add more fields similarly if needed
+                    }
                 });
             });
-        </script>
-        <script>
-            $(document).ready(function() {
-                $('#form').submit(function(e) {
-                    e.preventDefault();
-                    var routter = @json(route('patient.updatepatient'));
-
-                    var formData = new FormData(this); // Create a FormData object from the form
-
-                    $.ajax({
-                        url: routter,
-                        type: "POST",
-                        data: formData, // Use FormData object
-                        processData: false, // Don't process the data
-                        contentType: false, // Don't set content type (let jQuery handle it)
-                        success: function(response) {
-                            // Handle success response
-                            console.log(response);
-
-                            // Show success notification to the user
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.message,
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // Redirect back after the success notification
-                                    window.location.reload();
-                                }
-                            });
-                        },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                // If validation fails, display errors
-                                var errors = xhr.responseJSON.errors;
-                                var errorMessage = '';
-                                $.each(errors, function(key, value) {
-                                    errorMessage += value[0] + '<br>';
-                                });
-                                // Show error notification to the user
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Validation Error',
-                                    html: errorMessage,
-                                });
-                            } else {
-                                // Handle other error cases
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'Something went wrong. Please try again.',
-                                });
-                            }
-                        }
-                    });
-                });
-            });
-        </script>
-
-    </body>
-
-    {{-- ###################----SECTION END----######## --}}
-@endsection
+        });
+    </script>
+@endpush

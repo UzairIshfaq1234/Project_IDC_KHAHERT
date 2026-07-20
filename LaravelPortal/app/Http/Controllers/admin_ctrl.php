@@ -24,13 +24,28 @@ class admin_ctrl extends Controller
         $all_NotTreated_count = idc_patient::where('treated','0')->count();
         $all_Treated_count = idc_patient::where('treated','1')->count();
 
+        // Last 6 months intake trend for dashboard chart
+        $monthly = idc_patient::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as total, SUM(CASE WHEN Result = 'Positive' THEN 1 ELSE 0 END) as positive")
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get()
+            ->keyBy('ym');
 
+        $trend_labels = [];
+        $trend_total = [];
+        $trend_positive = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $row = $monthly->get($month->format('Y-m'));
+            $trend_labels[] = $month->format('M');
+            $trend_total[] = $row ? (int) $row->total : 0;
+            $trend_positive[] = $row ? (int) $row->positive : 0;
+        }
 
+        $recent_patients = idc_patient::latest('created_at')->take(6)->get();
 
-        // dd($all_Postive_count);
-
-
-        return view('admin.admin_dashboard',compact('all_admin_count','all_LT_count','all_Path_count','all_Postive_count','all_Negative_count','all_Patient_count','all_NotTreated_count','all_Treated_count'));
+        return view('admin.admin_dashboard',compact('all_admin_count','all_LT_count','all_Path_count','all_Postive_count','all_Negative_count','all_Patient_count','all_NotTreated_count','all_Treated_count','trend_labels','trend_total','trend_positive','recent_patients'));
     }
 
     public function addadmin(){

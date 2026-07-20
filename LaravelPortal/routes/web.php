@@ -5,6 +5,7 @@ use App\Http\Controllers\login_ctrl;
 use App\Http\Controllers\admin_ctrl;
 use App\Http\Controllers\LT_ctrl;
 use App\Http\Controllers\pathologist_ctrl;
+use App\Http\Controllers\profile_ctrl;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,10 +57,35 @@ Route::middleware(['LT'])->group(function () {
 
     Route::post('/Updatepatient', [LT_ctrl::class, 'Update_Patient_data'])->name('patient.updatepatient');
 
+    Route::get('/BarcodeScanner', [LT_ctrl::class, 'Barcode_Scanner'])->name('patient.scanner');
+    Route::post('/BarcodeLookup', [LT_ctrl::class, 'Barcode_Lookup'])->name('patient.barcodelookup');
+
 
 });
 
 ############## LAB TECHNICIAN ROUTES END #####################
+
+
+
+
+############## SHARED (ANY ROLE) ROUTES START #####################
+
+Route::middleware(['AnyRole'])->group(function () {
+
+    Route::get('/PatientCalendar', [LT_ctrl::class, 'Patient_Calendar'])->name('patient.calendar');
+    Route::get('/PatientProfile/{id}', [LT_ctrl::class, 'Patient_Profile'])->name('patient.profile');
+    Route::get('/PatientReceipt/{id}', [LT_ctrl::class, 'Patient_Receipt'])->name('patient.receipt');
+    Route::get('/PatientReport/{id}', [LT_ctrl::class, 'Patient_Report'])->name('patient.report');
+    Route::get('/PatientLabel/{id}', [LT_ctrl::class, 'Patient_Label'])->name('patient.label');
+
+    Route::get('/MyProfile', [profile_ctrl::class, 'index'])->name('profile.my');
+    Route::post('/MyProfile/Info', [profile_ctrl::class, 'updateInfo'])->name('profile.updateinfo');
+    Route::post('/MyProfile/Password', [profile_ctrl::class, 'updatePassword'])->name('profile.updatepassword');
+    Route::post('/MyProfile/Photo', [profile_ctrl::class, 'updatePhoto'])->name('profile.updatephoto');
+
+});
+
+############## SHARED (ANY ROLE) ROUTES END #####################
 
 
 

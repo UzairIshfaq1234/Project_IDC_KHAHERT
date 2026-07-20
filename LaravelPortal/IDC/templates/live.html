@@ -1,41 +1,385 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Cancer Detection</title>
+    <title>IDC Neural Engine · Live Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070b18;
+            --surface: rgba(19, 26, 51, .55);
+            --border: rgba(148, 163, 184, .16);
+            --text: #e6eaf5;
+            --muted: #8b96b5;
+            --violet: #a855f7;
+            --cyan: #22d3ee;
+            --green: #34d399;
+            --red: #f43f5e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-stage { position: fixed; inset: 0; z-index: -2; overflow: hidden; }
+        .bg-grid {
+            position: absolute; inset: -60px;
+            background-image:
+                linear-gradient(rgba(109, 93, 246, .06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(109, 93, 246, .06) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
+            -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
+            animation: gridPan 26s linear infinite;
+        }
+        @keyframes gridPan { from { transform: translateY(0); } to { transform: translateY(46px); } }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .45; animation: orbFloat 13s ease-in-out infinite alternate; }
+        .orb.o1 { width: 420px; height: 420px; background: #4c1d95; top: -140px; left: -120px; }
+        .orb.o2 { width: 340px; height: 340px; background: #9d174d; bottom: -140px; right: -120px; animation-delay: 4s; }
+        @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(50px,-40px) scale(1.15); } }
+
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            padding: 20px clamp(18px, 5vw, 56px);
+        }
+        .brand { display: flex; align-items: center; gap: 13px; text-decoration: none; }
+        .brand-icon {
+            width: 46px; height: 46px; border-radius: 14px;
+            background: linear-gradient(135deg, #4f46e5, #a855f7);
+            display: grid; place-items: center; color: #fff; font-size: 1.35rem;
+            box-shadow: 0 0 26px rgba(124, 58, 237, .7);
+        }
+        .brand strong { color: #fff; letter-spacing: .22em; font-size: 1.1rem; display: block; }
+        .brand small { color: var(--muted); font-size: .64rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        .chip-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); text-decoration: none;
+            font-size: .8rem; font-weight: 700; backdrop-filter: blur(10px);
+            transition: all .25s ease;
+        }
+        .chip-btn:hover { border-color: rgba(168, 85, 247, .6); color: #fff; transform: translateY(-2px); }
+
+        .stage-wrap { max-width: 900px; margin: 8px auto 60px; padding: 0 18px; }
+        .page-title { text-align: center; margin-bottom: 26px; }
+        .page-title h1 { font-size: clamp(1.5rem, 3.6vw, 2.3rem); font-weight: 800; letter-spacing: -.02em; }
+        .grad-anim {
+            background: linear-gradient(90deg, #a78bfa, #f472b6, #22d3ee, #a78bfa);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradSlide 6s linear infinite;
+        }
+        @keyframes gradSlide { to { background-position: 300% 0; } }
+        .page-title p { color: var(--muted); font-size: .85rem; font-weight: 500; margin-top: 8px; }
+
+        .cam-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 40px 90px -34px rgba(0, 0, 0, .8);
+            padding: clamp(16px, 3vw, 28px);
+        }
+
+        .viewport {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #05070f;
+            aspect-ratio: 16 / 9;
+        }
+        .viewport video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .hud { position: absolute; inset: 0; pointer-events: none; }
+        .hud .corner {
+            position: absolute; width: 44px; height: 44px;
+            border: 3px solid var(--cyan);
+            opacity: .9;
+            filter: drop-shadow(0 0 8px rgba(34, 211, 238, .8));
+            transition: border-color .4s ease, filter .4s ease;
+        }
+        .hud .corner.tl { top: 16px; left: 16px; border-right: none; border-bottom: none; border-radius: 10px 0 0 0; }
+        .hud .corner.tr { top: 16px; right: 16px; border-left: none; border-bottom: none; border-radius: 0 10px 0 0; }
+        .hud .corner.bl { bottom: 16px; left: 16px; border-right: none; border-top: none; border-radius: 0 0 0 10px; }
+        .hud .corner.br { bottom: 16px; right: 16px; border-left: none; border-top: none; border-radius: 0 0 10px 0; }
+        .viewport.state-pos .corner { border-color: var(--red); filter: drop-shadow(0 0 10px rgba(244, 63, 94, .9)); }
+        .viewport.state-neg .corner { border-color: var(--green); filter: drop-shadow(0 0 10px rgba(52, 211, 153, .9)); }
+
+        .hud .scanline {
+            position: absolute; left: 8%; right: 8%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            box-shadow: 0 0 20px var(--cyan);
+            animation: scanV 2.6s ease-in-out infinite;
+            opacity: 0;
+        }
+        .viewport.scanning .scanline { opacity: .85; }
+        @keyframes scanV { 0%, 100% { top: 10%; } 50% { top: 88%; } }
+
+        .hud .rec {
+            position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+            display: none; align-items: center; gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .66rem; font-weight: 700; letter-spacing: .2em;
+            color: #fff; background: rgba(2, 6, 23, .6);
+            padding: 6px 14px; border-radius: 999px;
+            backdrop-filter: blur(6px);
+        }
+        .viewport.scanning .rec { display: inline-flex; }
+        .hud .rec .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: blink 1.1s steps(2) infinite; }
+        @keyframes blink { 50% { opacity: .15; } }
+
+        .verdict {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(.8rem, 2.2vw, 1rem); font-weight: 800; letter-spacing: .18em;
+            padding: 11px 26px; border-radius: 999px;
+            background: rgba(2, 6, 23, .72);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            color: var(--muted);
+            transition: all .35s ease;
+            white-space: nowrap;
+        }
+        .verdict.pos { color: #fb7185; border-color: rgba(244, 63, 94, .6); box-shadow: 0 0 26px rgba(244, 63, 94, .35); }
+        .verdict.neg { color: #34d399; border-color: rgba(52, 211, 153, .6); box-shadow: 0 0 26px rgba(52, 211, 153, .3); }
+
+        .cam-off {
+            position: absolute; inset: 0;
+            display: grid; place-items: center;
+            text-align: center; color: var(--muted);
+        }
+        .cam-off .co-icon {
+            width: 80px; height: 80px; margin: 0 auto 16px;
+            border-radius: 24px;
+            background: rgba(109, 93, 246, .12);
+            border: 1px solid rgba(109, 93, 246, .35);
+            display: grid; place-items: center; font-size: 2rem; color: #c4b5fd;
+            animation: floatY 3.4s ease-in-out infinite;
+        }
+        @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+        .cam-off h5 { color: #fff; font-weight: 800; font-size: 1rem; }
+        .cam-off p { font-size: .76rem; font-weight: 600; margin-top: 6px; }
+
+        .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+        .btn-neo {
+            flex: 1; min-width: 180px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 14px 24px; border-radius: 15px;
+            border: none; cursor: pointer;
+            font-family: inherit; font-size: .9rem; font-weight: 800;
+            color: #fff; text-decoration: none;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed 55%, #a855f7);
+            box-shadow: 0 14px 34px -10px rgba(124, 58, 237, .7);
+            transition: all .3s ease;
+        }
+        .btn-neo:hover { transform: translateY(-3px); }
+        .btn-neo:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        .btn-neo.stop { background: linear-gradient(135deg, #be123c, #f43f5e); box-shadow: 0 14px 34px -10px rgba(244, 63, 94, .6); }
+        .btn-neo.ghost { background: rgba(19, 26, 51, .7); border: 1px solid var(--border); box-shadow: none; }
+        .btn-neo.ghost:hover { border-color: rgba(34, 211, 238, .6); color: var(--cyan); }
+
+        .log-panel { margin-top: 22px; }
+        .log-panel h6 {
+            font-size: .72rem; font-weight: 800; letter-spacing: .16em;
+            text-transform: uppercase; color: var(--muted);
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem; font-weight: 600;
+            background: rgba(5, 7, 15, .65);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            max-height: 170px; overflow-y: auto;
+            line-height: 2;
+        }
+        .log::-webkit-scrollbar { width: 7px; }
+        .log::-webkit-scrollbar-thumb { background: rgba(109, 93, 246, .4); border-radius: 99px; }
+        .log .t { color: var(--muted); }
+        .log .pos { color: #fb7185; font-weight: 800; }
+        .log .neg { color: #34d399; font-weight: 800; }
+        .log .sys { color: var(--cyan); }
+
+        footer {
+            text-align: center; padding: 20px 16px 32px;
+            color: var(--muted); font-size: .7rem; font-weight: 600;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container my-5">
-        <h1 class="display-4 text-center mb-4">Cancer Detection</h1>
-        <form action="/predict" method="post" enctype="multipart/form-data" id="upload-form">
-            <div class="mb-3">
-                <label for="file" class="form-label">Choose Images</label>
-                <input type="file" class="form-control" id="file" name="file" accept="image/*" multiple required>
-            </div>
-            <button type="submit" class="btn btn-primary">Predict</button>
-        </form>
-        <div id="results" class="mt-4">
-            {% if error %}
-                <div class="alert alert-danger my-2" role="alert">
-                    {{ error }}
-                </div>
-            {% elif results %}
-                {% for result in results %}
-                    <div class="alert {% if result.result == 1 %}alert-success{% else %}alert-danger{% endif %} my-2" role="alert">
-                        {{ result.filename }} - {% if result.result == 1 %}Positive{% else %}Negative{% endif %}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-        <a href="/live" class="btn btn-primary mt-4">Live Detection</a>
+<body>
+
+    <div class="bg-stage">
+        <div class="bg-grid"></div>
+        <span class="orb o1"></span>
+        <span class="orb o2"></span>
     </div>
-    <!-- Bootstrap JS and Popper.js (optional, for Bootstrap's JavaScript features) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-icon"><i class="bi bi-activity"></i></span>
+            <span>
+                <strong>I D C</strong>
+                <small>Neural Detection Engine</small>
+            </span>
+        </a>
+        <a class="chip-btn" href="/"><i class="bi bi-arrow-left"></i>Image Analysis</a>
+    </header>
+
+    <div class="stage-wrap">
+        <div class="page-title">
+            <h1>Live <span class="grad-anim">Microscope Detection</span></h1>
+            <p>Point your camera at a histopathology slide — frames stream to the CNN in real time.</p>
+        </div>
+
+        <div class="cam-panel">
+            <div class="viewport" id="viewport">
+                <video id="video" autoplay playsinline muted></video>
+
+                <div class="cam-off" id="camOff">
+                    <div>
+                        <div class="co-icon"><i class="bi bi-camera-video"></i></div>
+                        <h5>Camera is off</h5>
+                        <p>Press <b style="color:#c4b5fd;">Start Live Detection</b> and allow camera access</p>
+                    </div>
+                </div>
+
+                <div class="hud">
+                    <span class="corner tl"></span>
+                    <span class="corner tr"></span>
+                    <span class="corner bl"></span>
+                    <span class="corner br"></span>
+                    <span class="scanline"></span>
+                    <span class="rec"><span class="dot"></span>ANALYZING</span>
+                </div>
+
+                <div class="verdict" id="verdict">STANDBY</div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-neo" id="startBtn"><i class="bi bi-play-fill"></i>Start Live Detection</button>
+                <button class="btn-neo stop" id="stopBtn" disabled><i class="bi bi-stop-fill"></i>Stop</button>
+                <a class="btn-neo ghost" href="/"><i class="bi bi-images"></i>Analyze Images Instead</a>
+            </div>
+
+            <div class="log-panel">
+                <h6><i class="bi bi-terminal"></i>Detection Log</h6>
+                <div class="log" id="log"><span class="sys">» system ready — waiting for camera</span></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>© IDC Portal — Muhammad Uzair Ishfaq &amp; Khadija Ibrahim · AI-assisted histopathology screening</footer>
+
+    <canvas id="grab" hidden></canvas>
+
+    <script>
+        var video = document.getElementById('video');
+        var viewport = document.getElementById('viewport');
+        var camOff = document.getElementById('camOff');
+        var verdict = document.getElementById('verdict');
+        var startBtn = document.getElementById('startBtn');
+        var stopBtn = document.getElementById('stopBtn');
+        var log = document.getElementById('log');
+        var canvas = document.getElementById('grab');
+
+        var stream = null;
+        var timer = null;
+        var busy = false;
+
+        function addLog(html) {
+            var line = document.createElement('div');
+            line.innerHTML = html;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+            while (log.children.length > 60) log.removeChild(log.firstChild);
+        }
+
+        function ts() {
+            return '<span class="t">[' + new Date().toLocaleTimeString() + ']</span> ';
+        }
+
+        startBtn.addEventListener('click', async function () {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+                video.srcObject = stream;
+                camOff.style.display = 'none';
+                viewport.classList.add('scanning');
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                verdict.textContent = 'SCANNING…';
+                verdict.className = 'verdict';
+                addLog(ts() + '<span class="sys">» camera stream opened — streaming frames to CNN</span>');
+                timer = setInterval(captureAndPredict, 1300);
+            } catch (err) {
+                addLog(ts() + '<span class="pos">» camera access denied or unavailable</span>');
+                verdict.textContent = 'NO CAMERA';
+            }
+        });
+
+        stopBtn.addEventListener('click', stopAll);
+
+        function stopAll() {
+            if (timer) clearInterval(timer);
+            timer = null;
+            if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+            stream = null;
+            video.srcObject = null;
+            camOff.style.display = 'grid';
+            viewport.classList.remove('scanning', 'state-pos', 'state-neg');
+            verdict.textContent = 'STANDBY';
+            verdict.className = 'verdict';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            addLog(ts() + '<span class="sys">» detection stopped</span>');
+        }
+
+        function captureAndPredict() {
+            if (busy || !stream || video.readyState < 2) return;
+            busy = true;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+            fetch('/predict-live', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_data: dataUrl })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var pos = data.result === 1;
+                verdict.textContent = pos ? '⚠ POSITIVE — IDC DETECTED' : '✓ NEGATIVE — CLEAR';
+                verdict.className = 'verdict ' + (pos ? 'pos' : 'neg');
+                viewport.classList.toggle('state-pos', pos);
+                viewport.classList.toggle('state-neg', !pos);
+                addLog(ts() + '» frame verdict: ' + (pos
+                    ? '<span class="pos">POSITIVE</span>'
+                    : '<span class="neg">NEGATIVE</span>'));
+            })
+            .catch(function () {
+                addLog(ts() + '<span class="pos">» prediction request failed</span>');
+            })
+            .finally(function () { busy = false; });
+        }
+
+        window.addEventListener('beforeunload', function () {
+            if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+        });
+    </script>
 </body>
 </html>

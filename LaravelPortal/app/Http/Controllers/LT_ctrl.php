@@ -29,13 +29,116 @@ class LT_ctrl extends Controller
     $all_Treated_count = idc_patient::where('treated',1)->count();
 
 
-    // dd($last_updated_treated_record);
+    $recent_patients = idc_patient::latest('created_at')->take(6)->get();
 
-        return view('LT.LT_dashboard',compact('total_patient_added_today_treated','all_Patient_count','last_updated_treated_record','all_NotTreated_count','all_Treated_count'));
+        return view('LT.LT_dashboard',compact('total_patient_added_today_treated','all_Patient_count','last_updated_treated_record','all_NotTreated_count','all_Treated_count','recent_patients'));
     }
 
     public function addpatient(){
         return view('LT.patients_add');
+    }
+
+
+    public function Barcode_Scanner()
+    {
+        return view('LT.barcode_scanner');
+    }
+
+
+    public function Barcode_Lookup(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        $patient = idc_patient::where('Sampleno', trim($request->code))->first();
+
+        if (! $patient) {
+            return response()->json(['found' => false, 'message' => 'No patient matches this barcode / sample number.']);
+        }
+
+        return response()->json([
+            'found'   => true,
+            'patient' => [
+                'id'        => $patient->Id,
+                'name'      => $patient->Name,
+                'sampleno'  => $patient->Sampleno,
+                'email'     => $patient->Email,
+                'contactno' => $patient->Contactno,
+                'addedby'   => $patient->Addedby,
+                'treated'   => $patient->treated,
+                'result'    => $patient->Result,
+                'date'      => $patient->created_at ? $patient->created_at->format('d M Y · h:i A') : '',
+                'profile'   => route('patient.profile', ['id' => $patient->Id]),
+                'receipt'   => route('patient.receipt', ['id' => $patient->Id]),
+                'label'     => route('patient.label', ['id' => $patient->Id]),
+                'report'    => $patient->treated == '1' ? route('patient.report', ['id' => $patient->Id]) : null,
+            ],
+        ]);
+    }
+
+
+    public function Patient_Calendar()
+    {
+        $calendar_events = idc_patient::all()->map(function ($p) {
+            return [
+                'id'    => $p->Id,
+                'title' => $p->Name,
+                'start' => $p->created_at ? $p->created_at->format('Y-m-d') : null,
+                'extendedProps' => [
+                    'sampleno'  => $p->Sampleno,
+                    'name'      => $p->Name,
+                    'email'     => $p->Email,
+                    'contactno' => $p->Contactno,
+                    'addedby'   => $p->Addedby,
+                    'treated'   => $p->treated,
+                    'result'    => $p->Result,
+                    'date'      => $p->created_at ? $p->created_at->format('d M Y · h:i A') : '',
+                    'profile'   => route('patient.profile', ['id' => $p->Id]),
+                    'receipt'   => route('patient.receipt', ['id' => $p->Id]),
+                    'label'     => route('patient.label', ['id' => $p->Id]),
+                ],
+            ];
+        })->filter(fn ($e) => $e['start'])->values();
+
+        return view('LT.patient_calendar', compact('calendar_events'));
+    }
+
+
+    public function Patient_Profile($id)
+    {
+        $patient = idc_patient::where('Id', $id)->firstOrFail();
+
+        return view('LT.patient_profile', compact('patient'));
+    }
+
+
+    public function Patient_Receipt($id)
+    {
+        $patient = idc_patient::where('Id', $id)->firstOrFail();
+
+        return view('prints.patient_receipt', compact('patient'));
+    }
+
+
+    public function Patient_Report($id)
+    {
+        $patient = idc_patient::where('Id', $id)->firstOrFail();
+
+        if ($patient->treated != '1') {
+            flash()->addWarning('No diagnostic result has been recorded for this patient yet.');
+            return redirect()->back();
+        }
+
+        return view('prints.patient_report', compact('patient'));
+    }
+
+
+    public function Patient_Label($id)
+    {
+        $patient = idc_patient::where('Id', $id)->firstOrFail();
+
+        return view('prints.patient_label', compact('patient'));
     }
 
 

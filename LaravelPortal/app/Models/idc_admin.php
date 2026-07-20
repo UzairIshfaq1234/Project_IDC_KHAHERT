@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class idc_admin extends Model
 {
+    protected $primaryKey = 'Id';
+
     protected $fillable = ['Name','Username','Email','Password','Role','Contactno','Image'];
 
     use HasFactory;

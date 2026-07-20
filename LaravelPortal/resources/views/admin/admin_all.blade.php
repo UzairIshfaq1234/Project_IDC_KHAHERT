@@ -1,475 +1,305 @@
 @extends('app')
 
-@section('pagetitle', 'ALL ADMIN')
+@section('pagetitle', 'All Logins')
 
-{{-- ###################----SECTION START----######## --}}
 @section('content')
+    <div class="idc-shell">
 
+        @include('admin.admin_layout.admin_navbar')
 
-    <body class="fixed-left">
+        <div class="idc-main">
 
-        <!-- Begin page -->
-        <div id="wrapper">
+            @include('layouts.topbar', [
+                'title' => 'All Logins',
+                'crumb' => 'Administrator · Team Management',
+                'userName' => session('Admin_Auth_Session'),
+                'avatarFile' => session('Admin_Role_Image'),
+            ])
 
-            @include('admin.admin_layout.admin_navbar')
+            <div class="idc-content">
 
-
-
-            <!-- ============================================================== -->
-            <!-- Start right Content here -->
-            <!-- ============================================================== -->
-            <div class="content-page">
-                <!-- Start content -->
-                <div class="content">
-                    <div class="container">
-
-
-
-                        <!-- End row -->
-                        <!-- Page-Title -->
-                        <div class="row ">
-                            <div class="col-sm-12">
-                                <h4 class="page-title ">All Admins</h4>
-
-                            </div>
-
-
+                <div class="idc-card anim-fade-up">
+                    <div class="table-toolbar">
+                        <div>
+                            <h6 class="mb-0 fw-bolder"><i class="bi bi-people me-2 text-gradient"></i>Team Logins</h6>
+                            <div class="text-muted small fw-semibold">{{ count($all_admin_records) }} registered accounts</div>
                         </div>
-                        <br>
-
-
-                        <div class="panel">
-
-                            <div class="panel-body">
-
-
-
-
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="card-box">
-
-
-                                            <table id="demo-foo-filtering" class="table table-responsive table-striped toggle-circle m-b-0"
-                                                data-page-size="7">
-                                                <thead>
-                                                    <tr>
-                                                        <th data-toggle="true">Username</th>
-                                                        <th data-hide="phone,tablet">Passsword</th>
-                                                        <th data-hide="phone,tablet">Email</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <div class="form-inline m-b-20">
-                                                    <div class="row">
-                                                        <div class="col-sm-6 text-xs-center">
-                                                            <div class="form-group">
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-sm-6 text-xs-center text-right">
-                                                            <div class="form-group">
-                                                                <input id="demo-foo-search" type="text"
-                                                                    placeholder="Search" class="form-control input-sm"
-                                                                    autocomplete="on">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <tbody>
-                                                    @foreach ($all_admin_records as $record)
-                                                        <tr class="gradeX">
-
-                                                            <td>{{ $record->Username }}</td>
-
-                                                            <td>{{ $record->Password }}</td>
-                                                            <td>{{ $record->Email }}</td>
-
-                                                            <td class="actions ">
-
-                                                                <!-- Custom Modals -->
-
-                                                                <div id="con-close-modal" class="modal fade" tabindex="-1"
-                                                                    role="dialog" aria-labelledby="myModalLabel"
-                                                                    aria-hidden="true" style="display: none;">
-                                                                    <div class="modal-dialog">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <button type="button" class="close"
-                                                                                    data-dismiss="modal"
-                                                                                    aria-hidden="true">×</button>
-                                                                                <h4 class="modal-title">Update Login Data
-                                                                                </h4>
-                                                                            </div>
-                                                                            <form action="{{ route('admin.updateadmin') }}"
-                                                                                method="POST" enctype="multipart/form-data"
-                                                                                id="form" data-parsley-validate
-                                                                                novalidate>
-                                                                                {{ csrf_field() }}
-
-                                                                                <div class="modal-body">
-
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label for="userName">Name
-                                                                                                    <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input type="text"
-                                                                                                    name="Name"
-                                                                                                    parsley-trigger="change"
-                                                                                                    required
-                                                                                                    placeholder="Enter Name"
-                                                                                                    class="form-control"
-                                                                                                    id="Name">
-                                                                                                @error('name')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="Username">Username
-                                                                                                    <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input type="text"
-                                                                                                    name="Username"
-                                                                                                    parsley-trigger="change"
-                                                                                                    required
-                                                                                                    placeholder="Enter Unique Username"
-                                                                                                    class="form-control"
-                                                                                                    id="Username">
-                                                                                                @error('Username')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-
-
-
-
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="emailAddress">Email
-                                                                                                    Address <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input type="email"
-                                                                                                    name="Email"
-                                                                                                    parsley-trigger="change"
-                                                                                                    required
-                                                                                                    placeholder="Enter Email"
-                                                                                                    class="form-control"
-                                                                                                    id="Email">
-                                                                                                @error('Email')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="col-md-6">
-
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="pass1">Password
-                                                                                                    <span
-                                                                                                        style="color:red;">*</span></label>
-
-                                                                                                <input id="Password"
-                                                                                                    type="text"
-                                                                                                    name="Password"
-                                                                                                    placeholder="Password"
-                                                                                                    required
-                                                                                                    class="form-control">
-
-                                                                                                @error('Password')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="pass1">Role<span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <div>
-                                                                                                    <select id="Role" name="Role"
-                                                                                                        required
-                                                                                                        class="form-control">
-                                                                                                        <option selected
-                                                                                                            disabled>Select
-                                                                                                            Role</option>
-                                                                                                        <option
-                                                                                                            value="1">
-                                                                                                            Admin</option>
-                                                                                                        <option
-                                                                                                            value="2">
-                                                                                                            Laboratory
-                                                                                                            Technician
-                                                                                                        </option>
-                                                                                                        <option
-                                                                                                            value="3">
-                                                                                                            Pathologist
-                                                                                                        </option>
-                                                                                                    </select>
-
-                                                                                                    @error('Role')
-                                                                                                        <div
-                                                                                                            class="text-danger">
-                                                                                                            {{ $message }}
-                                                                                                        </div>
-                                                                                                    @enderror
-
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    for="pass1">Contact
-                                                                                                    No <span
-                                                                                                        style="color:red;">*</span></label>
-                                                                                                <input id="Contactno"
-                                                                                                    type="text"
-                                                                                                    name="ContactNo"
-                                                                                                    placeholder="Enter Contact No"
-                                                                                                    required
-                                                                                                    class="form-control">
-
-                                                                                                @error('ContactNo')
-                                                                                                    <div class="text-danger">
-                                                                                                        {{ $message }}
-                                                                                                    </div>
-                                                                                                @enderror
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-
-
-
-
-
-                                                                                    <div class="row">
-
-                                                                                        <div class="form-group col-md-12">
-
-                                                                                            <input type="hidden"
-                                                                                                name="Id"
-                                                                                                class="form-control"
-                                                                                                id="field-4">
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                </div>
-                                                                                <div class="modal-footer">
-                                                                                    <button type="button"
-                                                                                        class="btn btn-default waves-effect"
-                                                                                        data-dismiss="modal">Close</button>
-                                                                                    <button type="submit"
-                                                                                        class="btn btn-info waves-effect waves-light">Save
-                                                                                        changes</button>
-                                                                                </div>
-                                                                            </form>
-
-                                                                        </div>
-                                                                    </div>
-                                                                </div><!-- /.modal -->
-
-                                                                <a href="#"
-                                                                    class="on-default waves-effect waves-light edit-button"
-                                                                    data-record="{{ json_encode($record) }}"
-                                                                    data-toggle="modal" data-target="#con-close-modal">
-                                                                    <i class="fa fa-pencil"></i>
-                                                                </a>
-                                                                <a href="{{ route('admin.deladmin', ['id' => $record->Id]) }}"
-                                                                    class="on-default delete-link-admin"
-                                                                    data-id="{{ $record->Id }}">
-                                                                    <i class="fa fa-trash-o"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-
-                                                </tbody>
-
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+                            <button class="btn btn-soft btn-sm" data-export-table="#adminTable" data-export-name="idc-logins">
+                                <i class="bi bi-download me-1"></i>CSV
+                            </button>
+                            <button class="btn btn-soft btn-sm" data-print-page>
+                                <i class="bi bi-printer me-1"></i>Print
+                            </button>
+                            <a href="{{ route('admin.add') }}" class="btn btn-gradient btn-sm">
+                                <i class="bi bi-plus-lg me-1"></i>Add Login
+                            </a>
+                            <div class="search-box">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="form-control form-control-sm" placeholder="Search team…"
+                                    data-table-search="#adminTable">
                             </div>
-                            <!-- end: page -->
+                        </div>
+                    </div>
 
+                    <div class="table-responsive">
+                        <table class="table table-modern" id="adminTable">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Contact</th>
+                                    <th>Password</th>
+                                    <th data-no-export>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($all_admin_records as $record)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                @if ($record->Image)
+                                                    <img src="{{ asset('Admin_Images/' . $record->Image) }}" class="avatar" alt="{{ $record->Name }}">
+                                                @else
+                                                    <span class="avatar avatar-grad-{{ ($loop->index % 5) + 1 }}">{{ strtoupper(substr($record->Name ?? 'U', 0, 2)) }}</span>
+                                                @endif
+                                                <div>
+                                                    <div class="cell-title">{{ $record->Name }}</div>
+                                                    <div class="cell-sub">{{ $record->Email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="fw-bold">{{ $record->Username }}</span></td>
+                                        <td>
+                                            @if ($record->Role == 1)
+                                                <span class="badge-soft badge-soft-primary"><i class="bi bi-shield-check"></i>Admin</span>
+                                            @elseif ($record->Role == 2)
+                                                <span class="badge-soft badge-soft-success"><i class="bi bi-eyedropper"></i>Lab Technician</span>
+                                            @else
+                                                <span class="badge-soft badge-soft-violet"><i class="bi bi-clipboard2-pulse"></i>Pathologist</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $record->Contactno }}</td>
+                                        <td>
+                                            <span class="pw-mask" data-pw="{{ $record->Password }}">••••••••</span>
+                                            <button type="button" class="btn-icon ms-1 pw-reveal" title="Show / hide password" data-no-export>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                        <td data-no-export>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn-icon edit edit-button" title="Edit"
+                                                    data-record="{{ json_encode($record) }}"
+                                                    data-bs-toggle="modal" data-bs-target="#editAdminModal">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                                <a href="{{ route('admin.deladmin', ['id' => $record->Id]) }}"
+                                                    class="btn-icon delete delete-link-admin" title="Delete"
+                                                    data-id="{{ $record->Id }}">
+                                                    <i class="bi bi-trash3"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <div class="empty-state" data-search-empty style="display:none;">
+                            <div class="es-icon"><i class="bi bi-search"></i></div>
+                            <h6>No matches found</h6>
+                            <p>Try a different search term.</p>
                         </div>
                     </div>
                 </div>
 
-                <footer class="footer text-right">
-                    2023 © MUHAMMAD UZAIR ISHFAQ & KHADIJA IBRAHIM.
-                </footer>
-
             </div>
 
-
-            <!-- ============================================================== -->
-            <!-- End Right content here -->
-            <!-- ============================================================== -->
-
-
-
-
+            <footer class="idc-footer">
+                <span>© {{ date('Y') }} IDC Portal — Muhammad Uzair Ishfaq &amp; Khadija Ibrahim</span>
+                <span><i class="bi bi-cpu me-1"></i>AI-assisted histopathology</span>
+            </footer>
         </div>
-        <!-- END wrapper -->
-        <script>
-            $(document).ready(function() {
-                $('.delete-link-admin').click(function(event) {
-                    event.preventDefault(); // Prevent the default link behavior
+    </div>
 
-                    var deleteUrl = $(this).attr('href');
-                    var recordId = $(this).data('id');
+    {{-- ===== Edit Login modal (single, shared) ===== --}}
+    <div id="editAdminModal" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span class="mi"><i class="bi bi-pencil-square"></i></span>
+                        Update Login
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-                    // Show confirmation dialog
-                    Swal.fire({
-                        title: 'Delete Confirmation',
-                        text: 'Are you sure you want to delete this record?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#5FBEAA',
-                        confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Proceed with deletion
-                            deleteRecord(deleteUrl, recordId);
-                        }
-                    });
+                <form action="{{ route('admin.updateadmin') }}" method="POST" enctype="multipart/form-data" id="form" novalidate>
+                    {{ csrf_field() }}
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="Name">Name <span class="req">*</span></label>
+                                <input type="text" name="Name" required placeholder="Enter Name" class="form-control" id="Name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Username">Username <span class="req">*</span></label>
+                                <input type="text" name="Username" required placeholder="Enter Unique Username"
+                                    class="form-control" id="Username">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Email">Email Address <span class="req">*</span></label>
+                                <input type="email" name="Email" required placeholder="Enter Email" class="form-control" id="Email">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Password">Password <span class="req">*</span></label>
+                                <input id="Password" type="text" name="Password" placeholder="Password" required class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Role">Role <span class="req">*</span></label>
+                                <select id="Role" name="Role" required class="form-select">
+                                    <option selected disabled>Select Role</option>
+                                    <option value="1">Admin</option>
+                                    <option value="2">Laboratory Technician</option>
+                                    <option value="3">Pathologist</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="Contactno">Contact No <span class="req">*</span></label>
+                                <input id="Contactno" type="text" name="ContactNo" maxlength="11"
+                                    placeholder="Enter Contact No" required class="form-control">
+                            </div>
+                        </div>
+                        <input type="hidden" name="Id" id="field-4">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-gradient">
+                            <i class="bi bi-check2-circle me-1"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // Password reveal toggle per row
+            $('.pw-reveal').click(function() {
+                var mask = $(this).siblings('.pw-mask');
+                var showing = mask.data('showing');
+                mask.text(showing ? '••••••••' : mask.data('pw')).data('showing', !showing);
+                $(this).find('i').attr('class', showing ? 'bi bi-eye' : 'bi bi-eye-slash');
+            });
+
+            $('.delete-link-admin').click(function(event) {
+                event.preventDefault();
+
+                var deleteUrl = $(this).attr('href');
+                var recordId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Delete Confirmation',
+                    text: 'Are you sure you want to delete this record?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteRecord(deleteUrl, recordId);
+                    }
                 });
+            });
 
-                function deleteRecord(url, id) {
-                    $.ajax({
-                        url: url,
-                        type: "GET", // or "POST" based on your route definition
-                        success: function(response) {
-                            // Handle success response
-                            console.log(response);
+            function deleteRecord(url, id) {
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.toast_message,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong. Please try again.',
+                        });
+                    }
+                });
+            }
 
-                            // Show success notification to the user
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.toast_message,
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // Redirect back after the success notification
-                                    window.location.reload();
-                                }
+            $('.edit-button').click(function() {
+                var recordData = $(this).data('record');
+                $('#Name').val(recordData.Name);
+                $('#Username').val(recordData.Username);
+                $('#Email').val(recordData.Email);
+                $('#Password').val(recordData.Password);
+                $('#Role').val(recordData.Role);
+                $('#Contactno').val(recordData.Contactno);
+
+                $('#field-4').val(recordData.Id);
+            });
+
+            $('#form').submit(function(e) {
+                e.preventDefault();
+                var routter = @json(route('admin.updateadmin'));
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: routter,
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessage = '';
+                            $.each(errors, function(key, value) {
+                                errorMessage += value[0] + '<br>';
                             });
-                        },
-                        error: function(xhr) {
-                            // Handle error cases
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validation Error',
+                                html: errorMessage,
+                            });
+                        } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
                                 text: 'Something went wrong. Please try again.',
                             });
                         }
-                    });
-                }
-            });
-        </script>
-
-
-        <script>
-            $(document).ready(function() {
-                $('.edit-button').click(function() {
-                    var recordData = $(this).data('record');
-                    $('#Name').val(recordData.Name);
-                    $('#Username').val(recordData.Username);
-                    $('#Email').val(recordData.Email);
-                    $('#Password').val(recordData.Password);
-                    $('#Role').val(recordData.Role);
-                    $('#Contactno').val(recordData.Contactno);
-
-                    $('#field-4').val(recordData.Id);
-
-                    // You can add more fields similarly if needed
+                    }
                 });
             });
-        </script>
-        <script>
-            $(document).ready(function() {
-                $('#form').submit(function(e) {
-                    e.preventDefault();
-                    var routter = @json(route('admin.updateadmin'));
-
-                    var formData = new FormData(this); // Create a FormData object from the form
-
-                    $.ajax({
-                        url: routter,
-                        type: "POST",
-                        data: formData, // Use FormData object
-                        processData: false, // Don't process the data
-                        contentType: false, // Don't set content type (let jQuery handle it)
-                        success: function(response) {
-                            // Handle success response
-                            console.log(response);
-
-                            // Show success notification to the user
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.message,
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // Redirect back after the success notification
-                                    window.location.reload();
-                                }
-                            });
-                        },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                // If validation fails, display errors
-                                var errors = xhr.responseJSON.errors;
-                                var errorMessage = '';
-                                $.each(errors, function(key, value) {
-                                    errorMessage += value[0] + '<br>';
-                                });
-                                // Show error notification to the user
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Validation Error',
-                                    html: errorMessage,
-                                });
-                            } else {
-                                // Handle other error cases
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'Something went wrong. Please try again.',
-                                });
-                            }
-                        }
-                    });
-                });
-            });
-        </script>
-
-    </body>
-
-    {{-- ###################----SECTION END----######## --}}
-@endsection
+        });
+    </script>
+@endpush

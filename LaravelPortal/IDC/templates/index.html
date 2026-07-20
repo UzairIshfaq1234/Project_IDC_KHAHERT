@@ -1,41 +1,618 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Cancer Detection</title>
+    <title>IDC Neural Engine · AI Cancer Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070b18;
+            --surface: rgba(19, 26, 51, .55);
+            --border: rgba(148, 163, 184, .16);
+            --text: #e6eaf5;
+            --muted: #8b96b5;
+            --primary: #6d5df6;
+            --violet: #a855f7;
+            --pink: #ec4899;
+            --cyan: #22d3ee;
+            --green: #34d399;
+            --red: #f43f5e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(109, 93, 246, .4); border-radius: 99px; }
+
+        /* ===== Animated background ===== */
+        .bg-stage { position: fixed; inset: 0; z-index: -2; overflow: hidden; }
+        .bg-grid {
+            position: absolute; inset: -60px;
+            background-image:
+                linear-gradient(rgba(109, 93, 246, .06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(109, 93, 246, .06) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
+            -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000 0%, transparent 100%);
+            animation: gridPan 26s linear infinite;
+        }
+        @keyframes gridPan { from { transform: translateY(0); } to { transform: translateY(46px); } }
+
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .45; animation: orbFloat 13s ease-in-out infinite alternate; }
+        .orb.o1 { width: 420px; height: 420px; background: #4c1d95; top: -140px; left: -120px; }
+        .orb.o2 { width: 340px; height: 340px; background: #9d174d; top: 30%; right: -140px; animation-delay: 3s; }
+        .orb.o3 { width: 300px; height: 300px; background: #0e7490; bottom: -120px; left: 30%; animation-delay: 6s; }
+        @keyframes orbFloat {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(50px, -40px) scale(1.15); }
+        }
+
+        .particle {
+            position: absolute; width: 4px; height: 4px; border-radius: 50%;
+            background: rgba(168, 85, 247, .7);
+            box-shadow: 0 0 10px rgba(168, 85, 247, .9);
+            animation: rise linear infinite;
+            bottom: -10px;
+        }
+        @keyframes rise {
+            from { transform: translateY(0); opacity: 0; }
+            12% { opacity: .8; }
+            88% { opacity: .8; }
+            to { transform: translateY(-108vh); opacity: 0; }
+        }
+
+        /* ===== Topbar ===== */
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            padding: 20px clamp(18px, 5vw, 56px);
+            position: relative; z-index: 5;
+        }
+        .brand { display: flex; align-items: center; gap: 13px; text-decoration: none; }
+        .brand-icon {
+            width: 46px; height: 46px; border-radius: 14px;
+            background: linear-gradient(135deg, #4f46e5, #a855f7);
+            display: grid; place-items: center;
+            color: #fff; font-size: 1.35rem;
+            box-shadow: 0 0 26px rgba(124, 58, 237, .7);
+            animation: iconGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes iconGlow {
+            from { box-shadow: 0 0 16px rgba(124, 58, 237, .55); }
+            to { box-shadow: 0 0 34px rgba(168, 85, 247, .95); }
+        }
+        .brand strong { color: #fff; letter-spacing: .22em; font-size: 1.1rem; display: block; }
+        .brand small { color: var(--muted); font-size: .64rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+
+        .top-links { display: flex; gap: 10px; }
+        .chip-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text); text-decoration: none;
+            font-size: .8rem; font-weight: 700;
+            backdrop-filter: blur(10px);
+            transition: all .25s ease;
+        }
+        .chip-btn:hover { border-color: rgba(168, 85, 247, .6); color: #fff; transform: translateY(-2px); box-shadow: 0 12px 26px -10px rgba(124, 58, 237, .6); }
+
+        /* ===== Hero ===== */
+        .hero { text-align: center; padding: clamp(28px, 6vh, 64px) 18px 10px; position: relative; z-index: 5; }
+        .hero-tag {
+            display: inline-flex; align-items: center; gap: 9px;
+            padding: 8px 18px; border-radius: 999px;
+            background: rgba(109, 93, 246, .12);
+            border: 1px solid rgba(109, 93, 246, .35);
+            color: #c4b5fd; font-size: .72rem; font-weight: 800;
+            letter-spacing: .14em; text-transform: uppercase;
+            animation: fadeUp .7s ease both;
+        }
+        .hero-tag .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--cyan);
+            animation: dotPulse 1.8s ease infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, .6); }
+            60% { box-shadow: 0 0 0 8px rgba(34, 211, 238, 0); }
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5.4vw, 3.6rem);
+            font-weight: 800; letter-spacing: -.03em;
+            line-height: 1.14;
+            margin: 22px auto 16px; max-width: 800px;
+            animation: fadeUp .7s ease .1s both;
+        }
+        .grad-anim {
+            background: linear-gradient(90deg, #a78bfa, #f472b6, #22d3ee, #a78bfa);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradSlide 6s linear infinite;
+        }
+        @keyframes gradSlide { to { background-position: 300% 0; } }
+        .hero p {
+            color: var(--muted); font-size: .95rem; font-weight: 500;
+            max-width: 620px; margin: 0 auto; line-height: 1.75;
+            animation: fadeUp .7s ease .2s both;
+        }
+
+        .stats-row {
+            display: flex; justify-content: center; gap: clamp(16px, 4vw, 46px);
+            flex-wrap: wrap; margin-top: 30px;
+            animation: fadeUp .7s ease .3s both;
+        }
+        .stat { text-align: center; }
+        .stat b { font-size: 1.35rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff; }
+        .stat span { display: block; font-size: .66rem; color: var(--muted); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-top: 3px; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== Main panel ===== */
+        .panel-wrap { max-width: 860px; margin: 40px auto 70px; padding: 0 18px; position: relative; z-index: 5; }
+        .glass-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 40px 90px -34px rgba(0, 0, 0, .8);
+            padding: clamp(22px, 4vw, 40px);
+            animation: fadeUp .7s ease .35s both;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-panel::before {
+            content: "";
+            position: absolute; inset: 0 0 auto 0; height: 1.5px;
+            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, .8), transparent);
+        }
+
+        /* ===== Drop zone ===== */
+        .drop-zone {
+            position: relative;
+            border: 2px dashed rgba(148, 163, 184, .3);
+            border-radius: 20px;
+            padding: clamp(30px, 5vw, 52px) 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .3s ease;
+            overflow: hidden;
+            background: rgba(11, 16, 32, .4);
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--violet);
+            background: rgba(109, 93, 246, .08);
+            box-shadow: inset 0 0 60px rgba(109, 93, 246, .1);
+        }
+        .drop-zone .scanline {
+            position: absolute; left: 0; right: 0; top: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            box-shadow: 0 0 18px var(--cyan);
+            animation: scan 3.2s ease-in-out infinite;
+            opacity: .8;
+        }
+        @keyframes scan {
+            0%, 100% { top: 6%; }
+            50% { top: 92%; }
+        }
+        .dz-icon {
+            width: 74px; height: 74px; margin: 0 auto 18px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, .3), rgba(168, 85, 247, .2));
+            border: 1px solid rgba(168, 85, 247, .4);
+            display: grid; place-items: center;
+            font-size: 2rem; color: #c4b5fd;
+            animation: floatY 3.4s ease-in-out infinite;
+        }
+        @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+        .drop-zone h5 { font-weight: 800; font-size: 1.05rem; color: #fff; }
+        .drop-zone .dz-hint { color: var(--muted); font-size: .78rem; font-weight: 600; margin-top: 7px; }
+        .drop-zone .dz-hint b { color: #c4b5fd; }
+
+        /* Previews */
+        .previews {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+            gap: 12px; margin-top: 20px;
+        }
+        .pv {
+            position: relative; border-radius: 13px; overflow: hidden;
+            border: 1px solid var(--border);
+            aspect-ratio: 1;
+            animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1) both;
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+        .pv img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .pv .pv-name {
+            position: absolute; inset: auto 0 0 0;
+            font-size: .56rem; font-weight: 700;
+            padding: 8px 6px 5px;
+            background: linear-gradient(transparent, rgba(2, 6, 23, .92));
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .pv .pv-x {
+            position: absolute; top: 5px; right: 5px;
+            width: 20px; height: 20px; border-radius: 7px;
+            background: rgba(2, 6, 23, .75);
+            border: none; color: #fda4af; font-size: .68rem;
+            display: grid; place-items: center; cursor: pointer;
+        }
+
+        /* Actions */
+        .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+        .btn-neo {
+            flex: 1; min-width: 200px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 15px 26px; border-radius: 15px;
+            border: none; cursor: pointer;
+            font-family: inherit; font-size: .92rem; font-weight: 800; letter-spacing: .02em;
+            color: #fff; text-decoration: none;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed 55%, #a855f7);
+            background-size: 160% 100%;
+            box-shadow: 0 14px 34px -10px rgba(124, 58, 237, .7);
+            transition: all .3s ease;
+            position: relative; overflow: hidden;
+        }
+        .btn-neo::after {
+            content: "";
+            position: absolute; top: 0; left: -70%;
+            width: 45%; height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .35), transparent);
+            transform: skewX(-20deg);
+            animation: shine 3.4s ease infinite;
+        }
+        @keyframes shine { 0%, 55% { left: -70%; } 100% { left: 140%; } }
+        .btn-neo:hover { transform: translateY(-3px); box-shadow: 0 20px 44px -12px rgba(168, 85, 247, .85); background-position: 100% 0; }
+        .btn-neo:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+        .btn-neo.ghost {
+            background: rgba(19, 26, 51, .7);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+        .btn-neo.ghost::after { display: none; }
+        .btn-neo.ghost:hover { border-color: rgba(34, 211, 238, .6); color: var(--cyan); }
+
+        /* ===== Results ===== */
+        .results-block { margin-top: 30px; }
+        .results-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+        .results-head h6 {
+            font-size: .78rem; font-weight: 800; letter-spacing: .16em;
+            text-transform: uppercase; color: var(--muted);
+            display: flex; align-items: center; gap: 9px;
+        }
+        .sum-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+        .sum-chip {
+            font-size: .68rem; font-weight: 800; letter-spacing: .04em;
+            padding: 6px 13px; border-radius: 999px;
+        }
+        .sum-chip.pos { background: rgba(244, 63, 94, .15); color: #fda4af; border: 1px solid rgba(244, 63, 94, .4); }
+        .sum-chip.neg { background: rgba(52, 211, 153, .13); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, .4); }
+
+        .result-card {
+            display: flex; align-items: center; gap: 16px;
+            background: rgba(11, 16, 32, .5);
+            border: 1px solid var(--border);
+            border-left: 4px solid;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 11px;
+            animation: slideIn .5s ease both;
+        }
+        .result-card:nth-child(2) { animation-delay: .08s; }
+        .result-card:nth-child(3) { animation-delay: .16s; }
+        .result-card:nth-child(4) { animation-delay: .24s; }
+        .result-card:nth-child(5) { animation-delay: .32s; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
+        .result-card.pos { border-left-color: var(--red); }
+        .result-card.neg { border-left-color: var(--green); }
+        .rc-icon { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; font-size: 1.2rem; flex-shrink: 0; }
+        .result-card.pos .rc-icon { background: rgba(244, 63, 94, .16); color: #fb7185; }
+        .result-card.neg .rc-icon { background: rgba(52, 211, 153, .14); color: #34d399; }
+        .rc-file { font-weight: 700; font-size: .86rem; word-break: break-all; }
+        .rc-sub { font-size: .7rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+        .rc-verdict {
+            margin-left: auto; flex-shrink: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .74rem; font-weight: 800; letter-spacing: .1em;
+            padding: 7px 15px; border-radius: 999px;
+        }
+        .result-card.pos .rc-verdict { background: rgba(244, 63, 94, .16); color: #fb7185; border: 1px solid rgba(244, 63, 94, .45); }
+        .result-card.neg .rc-verdict { background: rgba(52, 211, 153, .13); color: #34d399; border: 1px solid rgba(52, 211, 153, .45); }
+
+        .error-card {
+            background: rgba(244, 63, 94, .1);
+            border: 1px solid rgba(244, 63, 94, .4);
+            color: #fda4af;
+            border-radius: 14px;
+            padding: 15px 20px;
+            font-size: .85rem; font-weight: 600;
+            display: flex; align-items: center; gap: 11px;
+            animation: slideIn .4s ease both;
+        }
+
+        /* ===== Analyzing overlay ===== */
+        .overlay {
+            position: fixed; inset: 0; z-index: 90;
+            background: rgba(7, 11, 24, .93);
+            backdrop-filter: blur(10px);
+            display: none;
+            place-items: center;
+            text-align: center;
+        }
+        .overlay.active { display: grid; }
+        .neural-ring { position: relative; width: 130px; height: 130px; margin: 0 auto 30px; }
+        .neural-ring .ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--violet);
+            animation: spin 1.15s linear infinite;
+        }
+        .neural-ring .ring:nth-child(2) { inset: 14px; border-top-color: var(--pink); animation-duration: 1.6s; animation-direction: reverse; }
+        .neural-ring .ring:nth-child(3) { inset: 28px; border-top-color: var(--cyan); animation-duration: 2.1s; }
+        .neural-ring .core {
+            position: absolute; inset: 44px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(168, 85, 247, .9), rgba(79, 70, 229, .4));
+            animation: corePulse 1.4s ease-in-out infinite;
+            display: grid; place-items: center; font-size: 1.15rem; color: #fff;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes corePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.14); opacity: .8; } }
+        .overlay h5 { font-weight: 800; font-size: 1.15rem; letter-spacing: .02em; }
+        .overlay .ov-status {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--cyan); font-size: .76rem; font-weight: 700;
+            margin-top: 12px; min-height: 20px; letter-spacing: .06em;
+        }
+
+        footer {
+            text-align: center; padding: 26px 16px 34px;
+            color: var(--muted); font-size: .7rem; font-weight: 600;
+            position: relative; z-index: 5;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container my-5">
-        <h1 class="display-4 text-center mb-4">Cancer Detection</h1>
-        <form action="/predict" method="post" enctype="multipart/form-data" id="upload-form">
-            <div class="mb-3">
-                <label for="file" class="form-label">Choose Images</label>
-                <input type="file" class="form-control" id="file" name="file" accept="image/*" multiple required>
-            </div>
-            <button type="submit" class="btn btn-primary">Predict</button>
-        </form>
-        <div id="results" class="mt-4">
-            {% if error %}
-                <div class="alert alert-danger my-2" role="alert">
-                    {{ error }}
-                </div>
-            {% elif results %}
-                {% for result in results %}
-                    <div class="alert {% if result.result == 1 %}alert-success{% else %}alert-danger{% endif %} my-2" role="alert">
-                        {{ result.filename }} - {% if result.result == 1 %}Positive{% else %}Negative{% endif %}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-        <a href="/live" class="btn btn-primary mt-4">Live Detection</a>
+<body>
+
+    <!-- Animated background -->
+    <div class="bg-stage">
+        <div class="bg-grid"></div>
+        <span class="orb o1"></span>
+        <span class="orb o2"></span>
+        <span class="orb o3"></span>
     </div>
-    <!-- Bootstrap JS and Popper.js (optional, for Bootstrap's JavaScript features) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-icon"><i class="bi bi-activity"></i></span>
+            <span>
+                <strong>I D C</strong>
+                <small>Neural Detection Engine</small>
+            </span>
+        </a>
+        <nav class="top-links">
+            <a class="chip-btn" href="/live"><i class="bi bi-camera-video"></i><span class="d-live">Live Detection</span></a>
+            <a class="chip-btn" href="http://localhost:8095" target="_blank"><i class="bi bi-box-arrow-up-right"></i>Portal</a>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <span class="hero-tag"><span class="pulse-dot"></span>Deep Learning · CNN · Histopathology</span>
+        <h1>Detect <span class="grad-anim">Invasive Ductal Carcinoma</span><br>in seconds, not days</h1>
+        <p>
+            Upload histopathology slide patches and let our convolutional neural network screen them
+            for IDC — the most common form of breast cancer — with instant visual verdicts.
+        </p>
+        <div class="stats-row">
+            <div class="stat"><b>CNN</b><span>Architecture</span></div>
+            <div class="stat"><b>50×50</b><span>Patch Input</span></div>
+            <div class="stat"><b>&lt; 1s</b><span>Per Image</span></div>
+            <div class="stat"><b>24/7</b><span>Availability</span></div>
+        </div>
+    </section>
+
+    <!-- Main panel -->
+    <main class="panel-wrap">
+        <div class="glass-panel">
+            <form action="/predict" method="post" enctype="multipart/form-data" id="upload-form">
+                <div class="drop-zone" id="dropZone">
+                    <span class="scanline"></span>
+                    <input type="file" id="file" name="file" accept="image/*" multiple required hidden>
+                    <div class="dz-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                    <h5>Drop histopathology images here</h5>
+                    <div class="dz-hint">or <b>click to browse</b> · JPEG / PNG · multiple files supported</div>
+                    <div class="dz-hint" id="fileCount" style="color:#22d3ee;"></div>
+                </div>
+
+                <div class="previews" id="previews"></div>
+
+                <div class="actions">
+                    <button type="submit" class="btn-neo" id="analyzeBtn">
+                        <i class="bi bi-cpu"></i> Run Neural Analysis
+                    </button>
+                    <a href="/live" class="btn-neo ghost">
+                        <i class="bi bi-camera-video"></i> Live Microscope Mode
+                    </a>
+                </div>
+            </form>
+
+            <div class="results-block" id="resultsBlock">
+                {% if error %}
+                    <div class="error-card"><i class="bi bi-exclamation-triangle"></i>{{ error }}</div>
+                {% elif results %}
+                    {% set pos = results | selectattr('result', 'equalto', 1) | list | length %}
+                    {% set neg = results | length - pos %}
+                    <div class="results-head">
+                        <h6><i class="bi bi-clipboard2-pulse"></i>Analysis Results</h6>
+                        <div class="sum-chips">
+                            {% if pos %}<span class="sum-chip pos">⚠ {{ pos }} POSITIVE</span>{% endif %}
+                            {% if neg %}<span class="sum-chip neg">✓ {{ neg }} NEGATIVE</span>{% endif %}
+                        </div>
+                    </div>
+                    {% for result in results %}
+                        <div class="result-card {% if result.result == 1 %}pos{% else %}neg{% endif %}">
+                            <span class="rc-icon">
+                                <i class="bi {% if result.result == 1 %}bi-exclamation-triangle{% else %}bi-check-circle{% endif %}"></i>
+                            </span>
+                            <span>
+                                <span class="rc-file">{{ result.filename }}</span>
+                                <span class="rc-sub" style="display:block;">
+                                    {% if result.result == 1 %}IDC indicators detected — pathologist review required{% else %}No IDC indicators detected in this patch{% endif %}
+                                </span>
+                            </span>
+                            <span class="rc-verdict">{% if result.result == 1 %}POSITIVE{% else %}NEGATIVE{% endif %}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Analyzing overlay -->
+    <div class="overlay" id="overlay">
+        <div>
+            <div class="neural-ring">
+                <span class="ring"></span>
+                <span class="ring"></span>
+                <span class="ring"></span>
+                <span class="core"><i class="bi bi-cpu"></i></span>
+            </div>
+            <h5>Neural network analyzing…</h5>
+            <div class="ov-status" id="ovStatus">initializing model</div>
+        </div>
+    </div>
+
+    <footer>
+        © IDC Portal — Muhammad Uzair Ishfaq &amp; Khadija Ibrahim · AI-assisted histopathology screening
+    </footer>
+
+    <script>
+        // Floating particles
+        (function () {
+            var stage = document.querySelector('.bg-stage');
+            for (var i = 0; i < 22; i++) {
+                var p = document.createElement('span');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.animationDuration = (9 + Math.random() * 14) + 's';
+                p.style.animationDelay = -(Math.random() * 18) + 's';
+                p.style.opacity = .25 + Math.random() * .5;
+                var s = 2 + Math.random() * 3;
+                p.style.width = s + 'px';
+                p.style.height = s + 'px';
+                stage.appendChild(p);
+            }
+        })();
+
+        // Drop zone + previews
+        var dropZone = document.getElementById('dropZone');
+        var fileInput = document.getElementById('file');
+        var previews = document.getElementById('previews');
+        var fileCount = document.getElementById('fileCount');
+        var dt = new DataTransfer();
+
+        dropZone.addEventListener('click', function () { fileInput.click(); });
+
+        ['dragenter', 'dragover'].forEach(function (ev) {
+            dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(function (ev) {
+            dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.remove('dragover'); });
+        });
+        dropZone.addEventListener('drop', function (e) {
+            addFiles(e.dataTransfer.files);
+        });
+        fileInput.addEventListener('change', function (e) {
+            if (fileInput.files !== dt.files) addFiles(fileInput.files);
+        });
+
+        function addFiles(list) {
+            Array.prototype.forEach.call(list, function (f) {
+                if (f.type.indexOf('image/') === 0) dt.items.add(f);
+            });
+            sync();
+        }
+
+        function removeFile(idx) {
+            dt.items.remove(idx);
+            sync();
+        }
+
+        function sync() {
+            fileInput.files = dt.files;
+            previews.innerHTML = '';
+            Array.prototype.forEach.call(dt.files, function (f, i) {
+                var d = document.createElement('div');
+                d.className = 'pv';
+                d.style.animationDelay = (i * 0.05) + 's';
+                var img = document.createElement('img');
+                img.src = URL.createObjectURL(f);
+                img.alt = f.name;
+                var n = document.createElement('span');
+                n.className = 'pv-name';
+                n.textContent = f.name;
+                var x = document.createElement('button');
+                x.type = 'button';
+                x.className = 'pv-x';
+                x.innerHTML = '<i class="bi bi-x-lg"></i>';
+                x.onclick = function (e) { e.stopPropagation(); removeFile(i); };
+                d.appendChild(img); d.appendChild(n); d.appendChild(x);
+                previews.appendChild(d);
+            });
+            fileCount.textContent = dt.files.length
+                ? dt.files.length + ' image' + (dt.files.length > 1 ? 's' : '') + ' ready for analysis'
+                : '';
+        }
+
+        // Analyzing overlay with staged status text
+        var form = document.getElementById('upload-form');
+        var overlay = document.getElementById('overlay');
+        var ovStatus = document.getElementById('ovStatus');
+        var stages = [
+            'initializing model',
+            'preprocessing patches → 50×50×3',
+            'running convolution layers',
+            'extracting feature maps',
+            'computing softmax verdicts',
+            'compiling report'
+        ];
+        form.addEventListener('submit', function (e) {
+            if (!dt.files.length) {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+                setTimeout(function () { dropZone.classList.remove('dragover'); }, 700);
+                return;
+            }
+            overlay.classList.add('active');
+            var i = 0;
+            ovStatus.textContent = stages[0];
+            setInterval(function () {
+                i = (i + 1) % stages.length;
+                ovStatus.textContent = stages[i];
+            }, 900);
+        });
+
+        // Scroll to results after server render
+        var rb = document.getElementById('resultsBlock');
+        if (rb && rb.children.length) {
+            setTimeout(function () { rb.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 350);
+        }
+    </script>
 </body>
 </html>
